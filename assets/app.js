@@ -60,6 +60,7 @@ const checkEmptyString = (string) => string.trim().length === 0
 const stringHasUppercase = (string) => /[A-Z]/.test(string)
 const splitTextByEmptyCharacters = (string) =>
   string.split(/(\s+)/).filter((str) => !checkEmptyString(str))
+const stringHasSpecialCharacters = (string) => !/^[a-zA-Z]+$/.test(string)
 
 const reset = (message) => {
   resultTab.classList.add(RESULT_INACTIVE_ATTRIBUTE)
@@ -86,6 +87,13 @@ const onActionClick = (element) => {
       throw new Error("O texto não pode estar vazio")
     if (stringHasUppercase(userInput))
       throw new Error("O texto não pode conter letras maiúsculas")
+    if (
+      splitTextByEmptyCharacters(userInput).forEach((text) => {
+        if (!stringHasSpecialCharacters(text)) return
+        throw new Error("O texto não pode conter letras especiais")
+      })
+    ) {
+    }
 
     if (!CRYPT_ACTION_FUNCTIONS[target]) return
     CRYPT_ACTION_FUNCTIONS[target](userInput)
