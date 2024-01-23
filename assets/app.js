@@ -60,7 +60,7 @@ const checkEmptyString = (string) => string.trim().length === 0
 const stringHasUppercase = (string) => /[A-Z]/.test(string)
 const splitTextByEmptyCharacters = (string) =>
   string.split(/(\s+)/).filter((str) => !checkEmptyString(str))
-const stringHasSpecialCharacters = (string) => !/^[a-zA-Z]+$/.test(string)
+const stringHasSpecialCharacters = (string) => /[\W_]/.test(string)
 
 const reset = (message) => {
   resultTab.classList.add(RESULT_INACTIVE_ATTRIBUTE)
