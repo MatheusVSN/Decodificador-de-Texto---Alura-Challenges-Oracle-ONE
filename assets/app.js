@@ -1,4 +1,5 @@
-const RESULT_INACTIVE_ATTRIBUTE = "result-inactive"
+const RESULT_INACTIVE_CLASS = "result-inactive"
+const FAILED_INTERACTION_BUTTON_CLASS = "failed-interaction-button"
 const DEFAULT_RESULT_PLACEHOLDER =
   "Digite um texto que você deseja criptografar ou descriptografar. "
 
@@ -26,7 +27,7 @@ const CRYPT_ACTION_FUNCTIONS = {
 
     const cryptTextResult = cryptTextList.join(" ")
 
-    resultTab.classList.remove(RESULT_INACTIVE_ATTRIBUTE)
+    resultTab.classList.remove(RESULT_INACTIVE_CLASS)
     resultTextElement.textContent = cryptTextResult
     copyButton.addEventListener("click", copyCryptText)
   },
@@ -43,7 +44,7 @@ const CRYPT_ACTION_FUNCTIONS = {
 
     const decryptTextResult = decryptTextList.join(" ")
 
-    resultTab.classList.remove(RESULT_INACTIVE_ATTRIBUTE)
+    resultTab.classList.remove(RESULT_INACTIVE_CLASS)
     resultTextElement.textContent = decryptTextResult
     copyButton.addEventListener("click", copyCryptText)
   },
@@ -62,11 +63,35 @@ const splitTextByEmptyCharacters = (string) =>
   string.split(/(\s+)/).filter((str) => !checkEmptyString(str))
 const stringHasSpecialCharacters = (string) => /[\W_]/.test(string)
 
-const reset = (message) => {
-  resultTab.classList.add(RESULT_INACTIVE_ATTRIBUTE)
+const disableButtons = () => {
+  cryptButton.setAttribute("disabled", true)
+  decryptButton.setAttribute("disabled", true)
+}
+
+const enableButtons = () => {
+  cryptButton.removeAttribute("disabled")
+  decryptButton.removeAttribute("disabled")
+}
+
+const resetButtonsStyles = () => {
+  cryptButton.classList.remove(FAILED_INTERACTION_BUTTON_CLASS)
+  decryptButton.classList.remove(FAILED_INTERACTION_BUTTON_CLASS)
+  cryptButton.textContent = "Criptografar"
+  decryptButton.textContent = "Descriptografar"
+  enableButtons()
+}
+
+const onActionFail = (message, element) => {
+  resultTab.classList.add(RESULT_INACTIVE_CLASS)
   resultTextElement.textContent = DEFAULT_RESULT_PLACEHOLDER
   copyButton.removeEventListener("click", copyCryptText)
-  alert(message)
+
+  disableButtons()
+  element.classList.add(FAILED_INTERACTION_BUTTON_CLASS)
+  element.textContent = message
+  setTimeout(() => {
+    resetButtonsStyles()
+  }, 3000)
 }
 
 const copyCryptText = () => {
@@ -79,6 +104,7 @@ const copyCryptText = () => {
 
 const onActionClick = (element) => {
   const target = element.target.id
+  resetButtonsStyles(element.target)
 
   try {
     const userInput = inputElement.value
@@ -90,15 +116,16 @@ const onActionClick = (element) => {
     if (
       splitTextByEmptyCharacters(userInput).forEach((text) => {
         if (!stringHasSpecialCharacters(text)) return
-        throw new Error("O texto não pode conter letras especiais")
+        throw new Error("O texto não pode conter caracteres especiais")
       })
     ) {
     }
 
     if (!CRYPT_ACTION_FUNCTIONS[target]) return
+    resetButtonsStyles()
     CRYPT_ACTION_FUNCTIONS[target](userInput)
   } catch (exception) {
-    reset(exception.message)
+    onActionFail(exception.message, element.target)
   }
 }
 
